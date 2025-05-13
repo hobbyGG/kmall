@@ -4,6 +4,7 @@ import (
 	"context"
 	"review-service/internal/biz"
 	"review-service/internal/data/model"
+	"review-service/internal/data/query"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -26,4 +27,21 @@ func (r *ReviewRepo) GetReviewByOrderID(ctx context.Context, orderID int64) ([]*
 		WithContext(ctx).
 		Where(r.data.Q.ReviewInfo.OrderID.Eq(orderID)).
 		Find()
+}
+
+func (r *ReviewRepo) SaveReply(ctx context.Context, reply *model.ReviewReplyInfo) error {
+	// 回复存储涉及两个表，需要使用事务操作
+	r.data.Q.Transaction(func(tx *query.Query) error {
+		if err := tx.ReviewReplyInfo.WithContext(ctx).Create(reply); err != nil {
+			return err
+		}
+		if _, err := tx.ReviewInfo.
+			WithContext(ctx).
+			Where(tx.ReviewInfo.ReviewID.Eq(reply.ReviewID)).
+			Update(tx.ReviewInfo.HasReply, 1); err != nil {
+			return err
+		}
+		return nil
+	})
+	return nil
 }

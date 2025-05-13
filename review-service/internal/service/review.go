@@ -56,3 +56,22 @@ func (s *ReviewService) GetReview(ctx context.Context, req *pb.GetReviewRequest)
 func (s *ReviewService) ListReview(ctx context.Context, req *pb.ListReviewRequest) (*pb.ListReviewReply, error) {
 	return &pb.ListReviewReply{}, nil
 }
+
+func (s *ReviewService) ReplyReview(ctx context.Context, req *pb.ReplyReviewRequest) (*pb.ReplyReviewReply, error) {
+	// 基本处理
+	reply := &model.ReviewReplyInfo{
+		ReviewID:  req.ReviewID,
+		StoreID:   req.StoreID,
+		Content:   req.Content,
+		PicInfo:   req.PicInfo,
+		VideoInfo: req.VideoInfo,
+	}
+	// 调用biz层服务
+	reply, err := s.uc.ReplyReview(ctx, reply)
+	if err != nil {
+		return nil, err
+	}
+
+	// 包装返回参数
+	return &pb.ReplyReviewReply{ReplyID: reply.ID}, nil
+}

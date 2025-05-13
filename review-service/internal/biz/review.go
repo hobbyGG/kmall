@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"errors"
 	v1 "review-service/api/review/v1"
 	"review-service/internal/data/model"
 	"review-service/pkg/GenID"
@@ -15,6 +16,8 @@ type ReviewRepo interface {
 	// query.query是gen生成的全局查询结构体，该结构体封装了所有表的查询方法
 	SaveReview(context.Context, *model.ReviewInfo) (*model.ReviewInfo, error)
 	GetReviewByOrderID(context.Context, int64) ([]*model.ReviewInfo, error)
+
+	SaveReply(context.Context, *model.ReviewReplyInfo) error
 }
 
 type ReviewUsecase struct {
@@ -45,4 +48,28 @@ func (uc *ReviewUsecase) SaveReview(ctx context.Context, review *model.ReviewInf
 	review.ReviewID = GenID.Get()
 
 	return uc.repo.SaveReview(ctx, review)
+}
+
+func (uc *ReviewUsecase) ReplyReview(ctx context.Context, reply *model.ReviewReplyInfo) (*model.ReviewReplyInfo, error) {
+	// 业务参数处理
+	// 水平越权处理
+	reviews, err := uc.repo.GetReviewByOrderID(ctx, reply.ReviewID)
+	if err != nil {
+		uc.log.Debugf("GetReviewByOrderID failed, err:%v", err)
+		return nil, err
+	}
+	review := reviews[0]
+	if review.StoreID != reply.StoreID {
+		// 评论的商家与回复的商家不同则发生越权
+		return nil, errors.New("不能回复其他商家的评论")
+	}
+	if review.HasReply != 0 {
+		// 已经评论过
+		return nil, errors.New("不允许重复回复")
+	}
+
+	// 将回复存入数据库
+	reply.ReplyID = GenID.Get()
+	uc.repo.SaveReply(ctx, reply)
+	return &model.ReviewReplyInfo{ReplyID: reply.ReplyID}, nil
 }
