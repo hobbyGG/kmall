@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"review-service/internal/conf"
+	"review-service/pkg/GenID"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
@@ -79,6 +80,10 @@ func main() {
 		panic(err)
 	}
 	defer cleanup()
+
+	if err := GenID.Init(bc.Snowflake.StartTime, bc.Snowflake.MechineId); err != nil {
+		panic(err)
+	}
 
 	// start and wait for stop signal
 	if err := app.Run(); err != nil {
