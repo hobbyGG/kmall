@@ -3,7 +3,7 @@ server:
     addr: 0.0.0.0:8000
     timeout: 1s
   grpc:
-    addr: 0.0.0.0:9000
+    addr: 0.0.0.0:9092
     timeout: 1s
 data:
   database:
@@ -16,3 +16,7 @@ data:
 snowflake:
   start_time: "2025-05-05"
   mechine_id: 3
+registry:
+  consul:
+    addr: 127.0.0.1:8500
+    scheme: http
