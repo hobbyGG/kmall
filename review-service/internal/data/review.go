@@ -29,6 +29,13 @@ func (r *ReviewRepo) GetReviewByOrderID(ctx context.Context, orderID int64) ([]*
 		Find()
 }
 
+func (r *ReviewRepo) GetReviewByReviewID(ctx context.Context, reviewID int64) (*model.ReviewInfo, error) {
+	return r.data.Q.ReviewInfo.
+		WithContext(ctx).
+		Where(r.data.Q.ReviewInfo.ReviewID.Eq(reviewID)).
+		First()
+}
+
 func (r *ReviewRepo) SaveReply(ctx context.Context, reply *model.ReviewReplyInfo) error {
 	// 回复存储涉及两个表，需要使用事务操作
 	r.data.Q.Transaction(func(tx *query.Query) error {
