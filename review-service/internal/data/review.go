@@ -2,11 +2,11 @@ package data
 
 import (
 	"context"
-	"review-service/internal/biz"
-	"review-service/internal/data/model"
-	"review-service/internal/data/query"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/hobbyGG/kmall/review-service/internal/biz"
+	"github.com/hobbyGG/kmall/review-service/internal/data/model"
+	"github.com/hobbyGG/kmall/review-service/internal/data/query"
 )
 
 type ReviewRepo struct {

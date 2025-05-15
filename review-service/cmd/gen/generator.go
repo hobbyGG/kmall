@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"review-service/internal/conf"
+
+	"github.com/hobbyGG/kmall/review-service/internal/conf"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"

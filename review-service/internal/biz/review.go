@@ -3,9 +3,10 @@ package biz
 import (
 	"context"
 	"errors"
-	v1 "review-service/api/review/v1"
-	"review-service/internal/data/model"
-	"review-service/pkg/GenID"
+
+	v1 "github.com/hobbyGG/kmall/review-service/api/review/v1"
+	"github.com/hobbyGG/kmall/review-service/internal/data/model"
+	"github.com/hobbyGG/kmall/review-service/pkg/GenID"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"gorm.io/gorm"

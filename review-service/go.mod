@@ -1,4 +1,4 @@
-module review-service
+module github.com/hobbyGG/kmall/review-service
 
 go 1.23.8
 

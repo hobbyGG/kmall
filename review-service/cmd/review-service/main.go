@@ -4,8 +4,8 @@ import (
 	"flag"
 	"os"
 
-	"review-service/internal/conf"
-	"review-service/pkg/GenID"
+	"github.com/hobbyGG/kmall/review-service/internal/conf"
+	"github.com/hobbyGG/kmall/review-service/pkg/GenID"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"

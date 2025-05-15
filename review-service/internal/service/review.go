@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	pb "review-service/api/review/v1"
-	"review-service/internal/biz"
-	"review-service/internal/data/model"
+	pb "github.com/hobbyGG/kmall/review-service/api/review/v1"
+	"github.com/hobbyGG/kmall/review-service/internal/biz"
+	"github.com/hobbyGG/kmall/review-service/internal/data/model"
 )
 
 type ReviewService struct {

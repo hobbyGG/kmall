@@ -1,11 +1,10 @@
 package data
 
 import (
-	"review-service/internal/conf"
-	"review-service/internal/data/query"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
+	"github.com/hobbyGG/kmall/review-service/internal/conf"
+	"github.com/hobbyGG/kmall/review-service/internal/data/query"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

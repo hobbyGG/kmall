@@ -1,9 +1,9 @@
 package server
 
 import (
-	v1 "review-service/api/review/v1"
-	"review-service/internal/conf"
-	"review-service/internal/service"
+	v1 "github.com/hobbyGG/kmall/review-service/api/review/v1"
+	"github.com/hobbyGG/kmall/review-service/internal/conf"
+	"github.com/hobbyGG/kmall/review-service/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
