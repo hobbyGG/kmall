@@ -34,6 +34,7 @@ service Review {
 message CreateReviewRequest {
 	int64 userID = 1 [(validate.rules).int64 = {gt: 0}];
 	int64 orderID = 2 [(validate.rules).int64 = {gt: 0}];
+	int64 storeID = 10 [(validate.rules).int64 = {gt: 0}];
 	int32 score = 3 [(validate.rules).int32 = {in: [1,2,3,4,5]}];
 	int32 serviceScore = 4 [(validate.rules).int32 = {in: [1,2,3,4,5]}];
 	int32 expressScore = 5 [(validate.rules).int32 = {in: [1,2,3,4,5]}];

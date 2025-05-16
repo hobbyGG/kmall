@@ -29,6 +29,7 @@ func (s *ReviewService) CreateReview(ctx context.Context, req *pb.CreateReviewRe
 	review := &model.ReviewInfo{
 		UserID:       req.UserID,
 		OrderID:      req.OrderID,
+		StoreID:      req.StoreID,
 		Socore:       req.Score,
 		ServiceScore: req.ServiceScore,
 		ExpressScore: req.ExpressScore,

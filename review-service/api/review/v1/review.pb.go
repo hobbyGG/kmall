@@ -27,6 +27,7 @@ type CreateReviewRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserID        int64                  `protobuf:"varint,1,opt,name=userID,proto3" json:"userID,omitempty"`
 	OrderID       int64                  `protobuf:"varint,2,opt,name=orderID,proto3" json:"orderID,omitempty"`
+	StoreID       int64                  `protobuf:"varint,10,opt,name=storeID,proto3" json:"storeID,omitempty"`
 	Score         int32                  `protobuf:"varint,3,opt,name=score,proto3" json:"score,omitempty"`
 	ServiceScore  int32                  `protobuf:"varint,4,opt,name=serviceScore,proto3" json:"serviceScore,omitempty"`
 	ExpressScore  int32                  `protobuf:"varint,5,opt,name=expressScore,proto3" json:"expressScore,omitempty"`
@@ -78,6 +79,13 @@ func (x *CreateReviewRequest) GetUserID() int64 {
 func (x *CreateReviewRequest) GetOrderID() int64 {
 	if x != nil {
 		return x.OrderID
+	}
+	return 0
+}
+
+func (x *CreateReviewRequest) GetStoreID() int64 {
+	if x != nil {
+		return x.StoreID
 	}
 	return 0
 }
@@ -587,10 +595,12 @@ var File_api_review_v1_review_proto protoreflect.FileDescriptor
 
 const file_api_review_v1_review_proto_rawDesc = "" +
 	"\n" +
-	"\x1aapi/review/v1/review.proto\x12\rapi.review.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17validate/validate.proto\"\xe3\x02\n" +
+	"\x1aapi/review/v1/review.proto\x12\rapi.review.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17validate/validate.proto\"\x86\x03\n" +
 	"\x13CreateReviewRequest\x12\x1f\n" +
 	"\x06userID\x18\x01 \x01(\x03B\a\xfaB\x04\"\x02 \x00R\x06userID\x12!\n" +
-	"\aorderID\x18\x02 \x01(\x03B\a\xfaB\x04\"\x02 \x00R\aorderID\x12%\n" +
+	"\aorderID\x18\x02 \x01(\x03B\a\xfaB\x04\"\x02 \x00R\aorderID\x12!\n" +
+	"\astoreID\x18\n" +
+	" \x01(\x03B\a\xfaB\x04\"\x02 \x00R\astoreID\x12%\n" +
 	"\x05score\x18\x03 \x01(\x05B\x0f\xfaB\f\x1a\n" +
 	"0\x010\x020\x030\x040\x05R\x05score\x123\n" +
 	"\fserviceScore\x18\x04 \x01(\x05B\x0f\xfaB\f\x1a\n" +
