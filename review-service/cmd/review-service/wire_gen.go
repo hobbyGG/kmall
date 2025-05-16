@@ -9,11 +9,11 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"review-service/internal/biz"
-	"review-service/internal/conf"
-	"review-service/internal/data"
-	"review-service/internal/server"
-	"review-service/internal/service"
+	"github.com/hobbyGG/kmall/review-service/internal/biz"
+	"github.com/hobbyGG/kmall/review-service/internal/conf"
+	"github.com/hobbyGG/kmall/review-service/internal/data"
+	"github.com/hobbyGG/kmall/review-service/internal/server"
+	"github.com/hobbyGG/kmall/review-service/internal/service"
 )
 
 import (
