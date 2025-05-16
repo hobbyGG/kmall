@@ -20,6 +20,8 @@ type ReviewRepo interface {
 	GetReviewByReviewID(context.Context, int64) (*model.ReviewInfo, error)
 
 	SaveReply(context.Context, *model.ReviewReplyInfo) error
+	CreateAppeal(context.Context, *model.ReviewAppealInfo) (int64, error)
+	OperateAppeal(context.Context, *model.ReviewAppealInfo) (int64, error)
 }
 
 type ReviewUsecase struct {
@@ -51,6 +53,14 @@ func (uc *ReviewUsecase) SaveReview(ctx context.Context, review *model.ReviewInf
 
 	return uc.repo.SaveReview(ctx, review)
 }
+func (uc *ReviewUsecase) GetReviewByOrderID(ctx context.Context, orderID int64) (*model.ReviewInfo, error) {
+	reviews, err := uc.repo.GetReviewByOrderID(ctx, orderID)
+	review := reviews[0]
+	return review, err
+}
+func (uc *ReviewUsecase) GetReviewByReviewID(ctx context.Context, reviewID int64) (*model.ReviewInfo, error) {
+	return uc.repo.GetReviewByReviewID(ctx, reviewID)
+}
 
 func (uc *ReviewUsecase) ReplyReview(ctx context.Context, reply *model.ReviewReplyInfo) (*model.ReviewReplyInfo, error) {
 	// 业务参数处理
@@ -79,4 +89,33 @@ func (uc *ReviewUsecase) ReplyReview(ctx context.Context, reply *model.ReviewRep
 	reply.ReplyID = GenID.Get()
 	uc.repo.SaveReply(ctx, reply)
 	return &model.ReviewReplyInfo{ReplyID: reply.ReplyID, ReviewID: review.ID}, nil
+}
+func (uc *ReviewUsecase) CreateAppeal(ctx context.Context, appeal *model.ReviewAppealInfo) (int64, error) {
+	// 业务参数处理
+	// 检查是否存在评论
+	// 检查是否越权
+	// 检查是否已经申诉过
+	review, err := uc.GetReviewByReviewID(ctx, appeal.ReviewID)
+	if err != nil {
+		// 出错或不存在评论
+		return -1, nil
+	}
+	if appeal.StoreID != review.StoreID {
+		return -1, errors.New("不能申诉其他商家的评论")
+	}
+	if review.Status == 40 {
+		return -1, errors.New("该评论已经申诉过")
+	}
+
+	appeal.AppealID = GenID.Get()
+	appeal.Status = 10
+	aid, err := uc.repo.CreateAppeal(ctx, appeal)
+	if err != nil {
+		return -1, err
+	}
+	return aid, nil
+}
+
+func (uc *ReviewUsecase) OperateAppeal(ctx context.Context, appeal *model.ReviewAppealInfo) (int64, error) {
+	return uc.repo.OperateAppeal(ctx, appeal)
 }

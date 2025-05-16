@@ -51,13 +51,58 @@ func (s *ReviewService) UpdateReview(ctx context.Context, req *pb.UpdateReviewRe
 func (s *ReviewService) DeleteReview(ctx context.Context, req *pb.DeleteReviewRequest) (*pb.DeleteReviewReply, error) {
 	return &pb.DeleteReviewReply{}, nil
 }
-func (s *ReviewService) GetReview(ctx context.Context, req *pb.GetReviewRequest) (*pb.GetReviewReply, error) {
-	return &pb.GetReviewReply{}, nil
+func (s *ReviewService) GetReviewByRID(ctx context.Context, req *pb.GetReviewRequest) (*pb.GetReviewReply, error) {
+	rid := req.ReviewID
+	// 调用biz层服务
+	review, err := s.uc.GetReviewByReviewID(ctx, rid)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetReviewReply{
+		ReviewID:  review.ID,
+		UserID:    review.UserID,
+		OrderID:   review.OrderID,
+		StoreID:   review.StoreID,
+		Score:     review.Socore,
+		Content:   review.Content,
+		PicInfo:   review.PicInfo,
+		VideoInfo: review.VideoInfo,
+	}, nil
 }
 func (s *ReviewService) ListReview(ctx context.Context, req *pb.ListReviewRequest) (*pb.ListReviewReply, error) {
 	return &pb.ListReviewReply{}, nil
 }
 
+func (s *ReviewService) CreateAppeal(ctx context.Context, req *pb.CreateAppealRequest) (*pb.CreateAppealReply, error) {
+	// 参数处理
+	appeal := &model.ReviewAppealInfo{
+		ReviewID: req.ReviewID,
+		StoreID:  req.StoreID,
+		Content:  req.Content,
+		Reason:   req.Reason,
+	}
+	aid, err := s.uc.CreateAppeal(ctx, appeal)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.CreateAppealReply{AppealID: aid}, nil
+}
+func (s *ReviewService) OperateAppeal(ctx context.Context, req *pb.OperateAppealRequest) (*pb.OperateAppealReply, error) {
+	// 参数处理
+	appeal := &model.ReviewAppealInfo{
+		AppealID: req.AppealID,
+		ReviewID: req.ReviewID,
+		StoreID:  req.StoreID,
+		Status:   req.Status,
+		OpRemark: req.OpRemark,
+		OpUser:   req.OpUser,
+	}
+	aid, err := s.uc.OperateAppeal(ctx, appeal)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.OperateAppealReply{AppealID: aid}, nil
+}
 func (s *ReviewService) ReplyReview(ctx context.Context, req *pb.ReplyReviewRequest) (*pb.ReplyReviewReply, error) {
 	// 基本处理
 	reply := &model.ReviewReplyInfo{

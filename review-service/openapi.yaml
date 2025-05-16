@@ -7,6 +7,28 @@ info:
     version: 0.0.1
 paths:
     /v1/review:
+        get:
+            tags:
+                - Review
+            operationId: Review_GetReviewByRID
+            parameters:
+                - name: reviewID
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetReviewReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
         post:
             tags:
                 - Review
@@ -56,6 +78,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /v1/review/{reviewID}:
+        get:
+            tags:
+                - Review
+            operationId: Review_GetReviewByRID
+            parameters:
+                - name: reviewID
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetReviewReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
 components:
     schemas:
         CreateReviewReply:
@@ -66,6 +112,34 @@ components:
         CreateReviewRequest:
             type: object
             properties:
+                userID:
+                    type: string
+                orderID:
+                    type: string
+                storeID:
+                    type: string
+                score:
+                    type: integer
+                    format: int32
+                serviceScore:
+                    type: integer
+                    format: int32
+                expressScore:
+                    type: integer
+                    format: int32
+                content:
+                    type: string
+                picInfo:
+                    type: string
+                videoInfo:
+                    type: string
+                anonymous:
+                    type: boolean
+        GetReviewReply:
+            type: object
+            properties:
+                reviewID:
+                    type: string
                 userID:
                     type: string
                 orderID:

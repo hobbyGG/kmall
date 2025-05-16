@@ -778,6 +778,17 @@ func (m *GetReviewRequest) validate(all bool) error {
 
 	var errors []error
 
+	if m.GetReviewID() <= 0 {
+		err := GetReviewRequestValidationError{
+			field:  "ReviewID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if len(errors) > 0 {
 		return GetReviewRequestMultiError(errors)
 	}
@@ -878,6 +889,91 @@ func (m *GetReviewReply) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for ReviewID
+
+	if m.GetUserID() <= 0 {
+		err := GetReviewReplyValidationError{
+			field:  "UserID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetOrderID() <= 0 {
+		err := GetReviewReplyValidationError{
+			field:  "OrderID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetStoreID() <= 0 {
+		err := GetReviewReplyValidationError{
+			field:  "StoreID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _GetReviewReply_Score_InLookup[m.GetScore()]; !ok {
+		err := GetReviewReplyValidationError{
+			field:  "Score",
+			reason: "value must be in list [1 2 3 4 5]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _GetReviewReply_ServiceScore_InLookup[m.GetServiceScore()]; !ok {
+		err := GetReviewReplyValidationError{
+			field:  "ServiceScore",
+			reason: "value must be in list [1 2 3 4 5]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _GetReviewReply_ExpressScore_InLookup[m.GetExpressScore()]; !ok {
+		err := GetReviewReplyValidationError{
+			field:  "ExpressScore",
+			reason: "value must be in list [1 2 3 4 5]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if utf8.RuneCountInString(m.GetContent()) < 10 {
+		err := GetReviewReplyValidationError{
+			field:  "Content",
+			reason: "value length must be at least 10 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for PicInfo
+
+	// no validation rules for VideoInfo
+
+	// no validation rules for Anonymous
+
 	if len(errors) > 0 {
 		return GetReviewReplyMultiError(errors)
 	}
@@ -955,6 +1051,30 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetReviewReplyValidationError{}
+
+var _GetReviewReply_Score_InLookup = map[int32]struct{}{
+	1: {},
+	2: {},
+	3: {},
+	4: {},
+	5: {},
+}
+
+var _GetReviewReply_ServiceScore_InLookup = map[int32]struct{}{
+	1: {},
+	2: {},
+	3: {},
+	4: {},
+	5: {},
+}
+
+var _GetReviewReply_ExpressScore_InLookup = map[int32]struct{}{
+	1: {},
+	2: {},
+	3: {},
+	4: {},
+	5: {},
+}
 
 // Validate checks the field values on ListReviewRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
@@ -1398,3 +1518,501 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ReplyReviewReplyValidationError{}
+
+// Validate checks the field values on CreateAppealRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *CreateAppealRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateAppealRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreateAppealRequestMultiError, or nil if none found.
+func (m *CreateAppealRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateAppealRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetReviewID() <= 0 {
+		err := CreateAppealRequestValidationError{
+			field:  "ReviewID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetStoreID() <= 0 {
+		err := CreateAppealRequestValidationError{
+			field:  "StoreID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for Reason
+
+	// no validation rules for Content
+
+	// no validation rules for PicInfo
+
+	// no validation rules for VideoInfo
+
+	if len(errors) > 0 {
+		return CreateAppealRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateAppealRequestMultiError is an error wrapping multiple validation
+// errors returned by CreateAppealRequest.ValidateAll() if the designated
+// constraints aren't met.
+type CreateAppealRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateAppealRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateAppealRequestMultiError) AllErrors() []error { return m }
+
+// CreateAppealRequestValidationError is the validation error returned by
+// CreateAppealRequest.Validate if the designated constraints aren't met.
+type CreateAppealRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateAppealRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateAppealRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateAppealRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateAppealRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateAppealRequestValidationError) ErrorName() string {
+	return "CreateAppealRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateAppealRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateAppealRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateAppealRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateAppealRequestValidationError{}
+
+// Validate checks the field values on CreateAppealReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *CreateAppealReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CreateAppealReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// CreateAppealReplyMultiError, or nil if none found.
+func (m *CreateAppealReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CreateAppealReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AppealID
+
+	if len(errors) > 0 {
+		return CreateAppealReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// CreateAppealReplyMultiError is an error wrapping multiple validation errors
+// returned by CreateAppealReply.ValidateAll() if the designated constraints
+// aren't met.
+type CreateAppealReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CreateAppealReplyMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CreateAppealReplyMultiError) AllErrors() []error { return m }
+
+// CreateAppealReplyValidationError is the validation error returned by
+// CreateAppealReply.Validate if the designated constraints aren't met.
+type CreateAppealReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CreateAppealReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CreateAppealReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CreateAppealReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CreateAppealReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CreateAppealReplyValidationError) ErrorName() string {
+	return "CreateAppealReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e CreateAppealReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCreateAppealReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CreateAppealReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CreateAppealReplyValidationError{}
+
+// Validate checks the field values on OperateAppealRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *OperateAppealRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on OperateAppealRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// OperateAppealRequestMultiError, or nil if none found.
+func (m *OperateAppealRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *OperateAppealRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if m.GetAppealID() <= 0 {
+		err := OperateAppealRequestValidationError{
+			field:  "AppealID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetStoreID() <= 0 {
+		err := OperateAppealRequestValidationError{
+			field:  "StoreID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if m.GetReviewID() <= 0 {
+		err := OperateAppealRequestValidationError{
+			field:  "ReviewID",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if _, ok := _OperateAppealRequest_Status_InLookup[m.GetStatus()]; !ok {
+		err := OperateAppealRequestValidationError{
+			field:  "Status",
+			reason: "value must be in list [1 2 3 4 5]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for OpRemark
+
+	// no validation rules for OpUser
+
+	if len(errors) > 0 {
+		return OperateAppealRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// OperateAppealRequestMultiError is an error wrapping multiple validation
+// errors returned by OperateAppealRequest.ValidateAll() if the designated
+// constraints aren't met.
+type OperateAppealRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m OperateAppealRequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m OperateAppealRequestMultiError) AllErrors() []error { return m }
+
+// OperateAppealRequestValidationError is the validation error returned by
+// OperateAppealRequest.Validate if the designated constraints aren't met.
+type OperateAppealRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e OperateAppealRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e OperateAppealRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e OperateAppealRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e OperateAppealRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e OperateAppealRequestValidationError) ErrorName() string {
+	return "OperateAppealRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e OperateAppealRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sOperateAppealRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = OperateAppealRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = OperateAppealRequestValidationError{}
+
+var _OperateAppealRequest_Status_InLookup = map[int32]struct{}{
+	1: {},
+	2: {},
+	3: {},
+	4: {},
+	5: {},
+}
+
+// Validate checks the field values on OperateAppealReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *OperateAppealReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on OperateAppealReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// OperateAppealReplyMultiError, or nil if none found.
+func (m *OperateAppealReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *OperateAppealReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AppealID
+
+	if len(errors) > 0 {
+		return OperateAppealReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// OperateAppealReplyMultiError is an error wrapping multiple validation errors
+// returned by OperateAppealReply.ValidateAll() if the designated constraints
+// aren't met.
+type OperateAppealReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m OperateAppealReplyMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m OperateAppealReplyMultiError) AllErrors() []error { return m }
+
+// OperateAppealReplyValidationError is the validation error returned by
+// OperateAppealReply.Validate if the designated constraints aren't met.
+type OperateAppealReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e OperateAppealReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e OperateAppealReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e OperateAppealReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e OperateAppealReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e OperateAppealReplyValidationError) ErrorName() string {
+	return "OperateAppealReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e OperateAppealReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sOperateAppealReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = OperateAppealReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = OperateAppealReplyValidationError{}

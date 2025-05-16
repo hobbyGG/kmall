@@ -19,7 +19,14 @@ service Review {
 	}
 	rpc UpdateReview (UpdateReviewRequest) returns (UpdateReviewReply);
 	rpc DeleteReview (DeleteReviewRequest) returns (DeleteReviewReply);
-	rpc GetReview (GetReviewRequest) returns (GetReviewReply);
+	rpc GetReviewByRID (GetReviewRequest) returns (GetReviewReply) {
+		option (google.api.http) = {
+			get: "/v1/review"
+			additional_bindings {
+                get: "/v1/review/{reviewID}"
+            }
+		};
+	}
 	rpc ListReview (ListReviewRequest) returns (ListReviewReply);
 
 	// B端
@@ -29,6 +36,10 @@ service Review {
 			body: "*"
 		};
 	}
+	rpc CreateAppeal(CreateAppealRequest) returns (CreateAppealReply);
+
+	// o端
+	rpc OperateAppeal(OperateAppealRequest) returns (OperateAppealReply);
 }
 
 message CreateReviewRequest {
@@ -53,8 +64,22 @@ message UpdateReviewReply {}
 message DeleteReviewRequest {}
 message DeleteReviewReply {}
 
-message GetReviewRequest {}
-message GetReviewReply {}
+message GetReviewRequest {
+	int64 reviewID = 1 [(validate.rules).int64 = {gt: 0}];
+}
+message GetReviewReply {
+	int64 reviewID = 11;
+	int64 userID = 1 [(validate.rules).int64 = {gt: 0}];
+	int64 orderID = 2 [(validate.rules).int64 = {gt: 0}];
+	int64 storeID = 10 [(validate.rules).int64 = {gt: 0}];
+	int32 score = 3 [(validate.rules).int32 = {in: [1,2,3,4,5]}];
+	int32 serviceScore = 4 [(validate.rules).int32 = {in: [1,2,3,4,5]}];
+	int32 expressScore = 5 [(validate.rules).int32 = {in: [1,2,3,4,5]}];
+	string content = 6 [(validate.rules).string.min_len = 10];
+	string picInfo = 7;
+	string videoInfo = 8;
+	bool anonymous = 9;
+}
 
 message ListReviewRequest {}
 message ListReviewReply {}
@@ -68,4 +93,28 @@ message ReplyReviewRequest {
 }
 message ReplyReviewReply {
 	int64 replyID = 1;
+}
+
+message CreateAppealRequest {
+	int64 reviewID = 1 [(validate.rules).int64 = {gt: 0}];
+	int64 storeID = 2 [(validate.rules).int64 = {gt: 0}];
+	string reason = 3;
+	string content = 4;
+	string picInfo = 5;
+	string videoInfo = 6;
+}
+message CreateAppealReply {
+	int64 appealID = 1;
+}
+
+message OperateAppealRequest {
+	int64 appealID = 1 [(validate.rules).int64 = {gt: 0}];
+	int64 storeID = 2 [(validate.rules).int64 = {gt: 0}];
+	int64 reviewID = 3 [(validate.rules).int64 = {gt: 0}];
+	int32 status = 4 [(validate.rules).int32 = {in: [1,2,3,4,5]}];
+	string opRemark = 5;
+	string opUser = 6;
+}
+message OperateAppealReply {
+	int64 appealID = 1;
 }
