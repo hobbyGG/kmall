@@ -45,12 +45,7 @@ func (s *ReviewService) CreateReview(ctx context.Context, req *pb.CreateReviewRe
 	// 返回响应
 	return &pb.CreateReviewReply{ReviewID: r.ID}, nil
 }
-func (s *ReviewService) UpdateReview(ctx context.Context, req *pb.UpdateReviewRequest) (*pb.UpdateReviewReply, error) {
-	return &pb.UpdateReviewReply{}, nil
-}
-func (s *ReviewService) DeleteReview(ctx context.Context, req *pb.DeleteReviewRequest) (*pb.DeleteReviewReply, error) {
-	return &pb.DeleteReviewReply{}, nil
-}
+
 func (s *ReviewService) GetReviewByRID(ctx context.Context, req *pb.GetReviewRequest) (*pb.GetReviewReply, error) {
 	rid := req.ReviewID
 	// 调用biz层服务
@@ -68,9 +63,6 @@ func (s *ReviewService) GetReviewByRID(ctx context.Context, req *pb.GetReviewReq
 		PicInfo:   review.PicInfo,
 		VideoInfo: review.VideoInfo,
 	}, nil
-}
-func (s *ReviewService) ListReview(ctx context.Context, req *pb.ListReviewRequest) (*pb.ListReviewReply, error) {
-	return &pb.ListReviewReply{}, nil
 }
 
 func (s *ReviewService) CreateAppeal(ctx context.Context, req *pb.CreateAppealRequest) (*pb.CreateAppealReply, error) {
@@ -120,4 +112,31 @@ func (s *ReviewService) ReplyReview(ctx context.Context, req *pb.ReplyReviewRequ
 
 	// 包装返回参数
 	return &pb.ReplyReviewReply{ReplyID: reply.ID}, nil
+}
+
+func (s *ReviewService) ListReviewByStoreID(ctx context.Context, req *pb.ListReviewByStoreIDRequest) (*pb.ListReviewByStoreIDReply, error) {
+	// 处理请求
+	// 调用biz层服务
+	res, err := s.uc.ListReviewByStoreID(ctx, req.StoreID, req.Page, req.Size)
+	if err != nil {
+		return nil, err
+	}
+	reply := make([]*pb.ReviewInfo, 0, len(res))
+	for _, r := range res {
+		reply = append(reply, &pb.ReviewInfo{
+			ReviewID:     r.ReviewID,
+			UserID:       r.UserID,
+			OrderID:      r.OrderID,
+			StoreID:      r.StoreID,
+			Score:        r.Socore,
+			Content:      r.Content,
+			PicInfo:      r.PicInfo,
+			VideoInfo:    r.VideoInfo,
+			ServiceScore: r.ServiceScore,
+			ExpressScore: r.ExpressScore,
+			Anonymous:    r.Anonymous == 1,
+		})
+	}
+
+	return &pb.ListReviewByStoreIDReply{Reviews: reply}, nil
 }

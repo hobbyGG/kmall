@@ -10,6 +10,7 @@ message Bootstrap {
   Data data = 2;
   Snowflake snowflake = 3;
   Registry registry = 4;
+  Elasticsearch elasticsearch = 5;
 }
 
 message Server {
@@ -53,4 +54,8 @@ message Registry {
     string scheme = 2;
   }
   Consul consul = 1;
+}
+
+message Elasticsearch {
+  repeated string address = 1;
 }

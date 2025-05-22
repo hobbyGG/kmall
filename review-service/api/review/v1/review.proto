@@ -17,8 +17,6 @@ service Review {
 			body: "*"
 		};
 	}
-	rpc UpdateReview (UpdateReviewRequest) returns (UpdateReviewReply);
-	rpc DeleteReview (DeleteReviewRequest) returns (DeleteReviewReply);
 	rpc GetReviewByRID (GetReviewRequest) returns (GetReviewReply) {
 		option (google.api.http) = {
 			get: "/v1/review"
@@ -27,7 +25,7 @@ service Review {
             }
 		};
 	}
-	rpc ListReview (ListReviewRequest) returns (ListReviewReply);
+	rpc ListReviewByStoreID(ListReviewByStoreIDRequest) returns (ListReviewByStoreIDReply) {}
 
 	// B端
 	rpc ReplyReview (ReplyReviewRequest) returns (ReplyReviewReply){
@@ -58,12 +56,6 @@ message CreateReviewReply {
 	int64 reviewID = 1;
 }
 
-message UpdateReviewRequest {}
-message UpdateReviewReply {}
-
-message DeleteReviewRequest {}
-message DeleteReviewReply {}
-
 message GetReviewRequest {
 	int64 reviewID = 1 [(validate.rules).int64 = {gt: 0}];
 }
@@ -81,8 +73,30 @@ message GetReviewReply {
 	bool anonymous = 9;
 }
 
-message ListReviewRequest {}
-message ListReviewReply {}
+
+message ListReviewByStoreIDRequest {
+	int64 storeID = 1 [(validate.rules).int64 = {gt: 0}];
+	int32 page = 2 [(validate.rules).int32 = {gt: 0}];
+	int32 size = 3 [(validate.rules).int32 = {gt: 0}];
+}
+
+message ListReviewByStoreIDReply {
+	repeated ReviewInfo reviews = 1;
+}
+
+message ReviewInfo {
+	int64 reviewID = 1;
+	int64 userID = 2;
+	int64 orderID = 3;
+	int64 storeID = 4;
+	int32 score = 5;
+	int32 serviceScore = 6;
+	int32 expressScore = 7; 
+	string content = 8;
+	string picInfo = 9;
+	string videoInfo = 10;
+	bool anonymous = 11;
+}
 
 message ReplyReviewRequest {
 	int64 reviewID = 1 [(validate.rules).int64 = {gt: 0}];

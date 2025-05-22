@@ -22,6 +22,7 @@ type ReviewRepo interface {
 	SaveReply(context.Context, *model.ReviewReplyInfo) error
 	CreateAppeal(context.Context, *model.ReviewAppealInfo) (int64, error)
 	OperateAppeal(context.Context, *model.ReviewAppealInfo) (int64, error)
+	ListReviewByStoreID(context.Context, int64, int32, int32) ([]*model.ReviewInfo, error)
 }
 
 type ReviewUsecase struct {
@@ -61,6 +62,28 @@ func (uc *ReviewUsecase) GetReviewByOrderID(ctx context.Context, orderID int64) 
 func (uc *ReviewUsecase) GetReviewByReviewID(ctx context.Context, reviewID int64) (*model.ReviewInfo, error) {
 	return uc.repo.GetReviewByReviewID(ctx, reviewID)
 }
+func (uc *ReviewUsecase) ListReviewByStoreID(ctx context.Context, storeID int64, page, size int32) ([]*model.ReviewInfo, error) {
+	// 简单参数处理
+	if storeID <= 0 {
+		uc.log.Debugf("[biz] ListReviewByStore failed, Store:%v", storeID)
+		return nil, errors.New("StoreID is invalid")
+	}
+	if page <= 0 {
+		uc.log.Debugf("[biz] ListReviewByStoreID failed, page:%v", page)
+		return nil, errors.New("page is invalid")
+	}
+	if size <= 0 {
+		uc.log.Debugf("[biz] ListReviewByStoreID failed, size:%v", size)
+		return nil, errors.New("size is invalid")
+	}
+
+	reviewList, err := uc.repo.ListReviewByStoreID(ctx, storeID, page, size)
+	if err != nil {
+		uc.log.Debugf("[biz] ListReviewByStoreID failed, err:%v", err)
+		return nil, err
+	}
+	return reviewList, nil
+}
 
 func (uc *ReviewUsecase) ReplyReview(ctx context.Context, reply *model.ReviewReplyInfo) (*model.ReviewReplyInfo, error) {
 	// 业务参数处理
@@ -98,7 +121,8 @@ func (uc *ReviewUsecase) CreateAppeal(ctx context.Context, appeal *model.ReviewA
 	review, err := uc.GetReviewByReviewID(ctx, appeal.ReviewID)
 	if err != nil {
 		// 出错或不存在评论
-		return -1, nil
+		uc.log.Debugf("[biz]GetReviewByOrderID failed, err:%v", err)
+		return -1, err
 	}
 	if appeal.StoreID != review.StoreID {
 		return -1, errors.New("不能申诉其他商家的评论")
