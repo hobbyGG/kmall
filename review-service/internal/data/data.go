@@ -1,27 +1,31 @@
 package data
 
 import (
+	"context"
+
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 	"github.com/hobbyGG/kmall/review-service/internal/conf"
 	"github.com/hobbyGG/kmall/review-service/internal/data/query"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewDB, NewData, NewESClient, NewReviewRepo)
+var ProviderSet = wire.NewSet(NewDB, NewData, NewESClient, NewReviewRepo, NewRedisClient)
 
 // Data .
 type Data struct {
 	// TODO wrapped database client
-	Q     *query.Query
-	ESCli *elasticsearch.TypedClient
+	Q        *query.Query
+	ESCli    *elasticsearch.TypedClient
+	RedisCli *redis.Client
 }
 
 // NewData .
-func NewData(db *gorm.DB, es *elasticsearch.TypedClient, logger log.Logger) (*Data, func(), error) {
+func NewData(db *gorm.DB, es *elasticsearch.TypedClient, r *redis.Client, logger log.Logger) (*Data, func(), error) {
 	cleanup := func() {
 		log.NewHelper(logger).Info("closing the data resources")
 	}
@@ -29,7 +33,7 @@ func NewData(db *gorm.DB, es *elasticsearch.TypedClient, logger log.Logger) (*Da
 	query.SetDefault(db)
 
 	// 将全局查询结构体传入data中，这样data就具备了查询的功能
-	return &Data{Q: query.Q, ESCli: es}, cleanup, nil
+	return &Data{Q: query.Q, ESCli: es, RedisCli: r}, cleanup, nil
 }
 
 func NewDB(c *conf.Data) (*gorm.DB, error) {
@@ -50,4 +54,16 @@ func NewESClient(c *conf.Elasticsearch) *elasticsearch.TypedClient {
 		panic(err)
 	}
 	return esClient
+}
+
+func NewRedisClient(c *conf.Data) *redis.Client {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:         c.Redis.Addr,
+		ReadTimeout:  c.Redis.ReadTimeout.AsDuration(),
+		WriteTimeout: c.Redis.WriteTimeout.AsDuration(),
+	})
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		panic(err)
+	}
+	return rdb
 }

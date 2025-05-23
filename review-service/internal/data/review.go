@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
@@ -11,6 +12,8 @@ import (
 	"github.com/hobbyGG/kmall/review-service/internal/biz"
 	"github.com/hobbyGG/kmall/review-service/internal/data/model"
 	"github.com/hobbyGG/kmall/review-service/internal/data/query"
+	"github.com/redis/go-redis/v9"
+	"golang.org/x/sync/singleflight"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -19,6 +22,8 @@ type ReviewRepo struct {
 	data *Data
 	log  *log.Helper
 }
+
+var g = singleflight.Group{}
 
 func NewReviewRepo(data *Data, logger log.Logger) biz.ReviewRepo {
 	return &ReviewRepo{data: data, log: log.NewHelper(logger)}
@@ -40,7 +45,7 @@ func (r *ReviewRepo) GetReviewByReviewID(ctx context.Context, reviewID int64) (*
 		Where(r.data.Q.ReviewInfo.ReviewID.Eq(reviewID)).
 		First()
 }
-func (r *ReviewRepo) ListReviewByStoreID(ctx context.Context, storeID int64, page, size int32) ([]*model.ReviewInfo, error) {
+func (r *ReviewRepo) ListReviewByStoreID_old(ctx context.Context, storeID int64, page, size int32) ([]*model.ReviewInfo, error) {
 	// 从es获取指定商家id的评论数据
 	resp, err := r.data.ESCli.Search().
 		Index("review_info").
@@ -106,6 +111,122 @@ func (r *ReviewRepo) ListReviewByStoreID(ctx context.Context, storeID int64, pag
 	r.log.Debugf("--->total %d es data, get %d, hits len %d\n", resp.Hits.Total.Value, len(infos), len(resp.Hits.Hits))
 
 	return infos, nil
+}
+func (r *ReviewRepo) ListReviewByStoreID(ctx context.Context, storeID int64, page, size int32) ([]*model.ReviewInfo, error) {
+	// 使用singleflight防止缓存击穿
+	// 先查询redis
+	// 再查es
+	// 将es返回的结果保存到redis中并返回
+	reviewInfoList, err, shared := g.Do("ListReviewByStoreID", func() (interface{}, error) {
+		key := fmt.Sprintf("review:%d:%d", page, size)
+		var retErr error
+		for i := 0; i < 2; i++ {
+			reviewHitsCache, err := r.getCache(ctx, key)
+			retErr = err
+			if err == nil {
+				// 缓存命中
+				// 缓存命中后可以直接返回数据，序列化等操作放在外层，后面缓存未命中就可以不用再处理数据。
+				// 这里使用两次循环，查完es后再查缓存，减少了代码量。
+				// 最优应该还是放在外层处理
+				hm := new(types.HitsMetadata)
+				if err := json.Unmarshal(reviewHitsCache, hm); err != nil {
+					r.log.Debugf("json unmarshal error: %v", err)
+					return nil, err
+				}
+				reviewInfoList := make([]*model.ReviewInfo, 0, hm.Total.Value)
+				for _, hit := range hm.Hits {
+					dataJson := hit.Source_
+					// 反序列化json数据到结构体
+					temp := biz.ReviewInfo{}
+					if err := json.Unmarshal(dataJson, &temp); err != nil {
+						r.log.Debugf("json unmarshal error: %v", err)
+						return nil, err
+					}
+					reviewInfoList = append(reviewInfoList, &model.ReviewInfo{
+						ID:             temp.ID,
+						CreateBy:       temp.CreateBy,
+						CreateAt:       time.Time(temp.CreateAt),
+						UpdateAt:       time.Time(temp.UpdateAt),
+						Version:        temp.Version,
+						DeleteAt:       temp.DeleteAt,
+						ReviewID:       temp.ReviewID,
+						OrderID:        temp.OrderID,
+						StoreID:        temp.StoreID,
+						UserID:         temp.UserID,
+						Socore:         temp.Socore,
+						Content:        temp.Content,
+						Status:         temp.Status,
+						IsDefault:      temp.IsDefault,
+						HasReply:       temp.HasReply,
+						ExpressScore:   temp.ExpressScore,
+						ServiceScore:   temp.ServiceScore,
+						HasMedia:       temp.HasMedia,
+						SkuID:          temp.SkuID,
+						SpuID:          temp.SpuID,
+						Anonymous:      temp.Anonymous,
+						Tags:           temp.Tags,
+						OpReason:       temp.OpReason,
+						OpUser:         temp.OpUser,
+						OpRemark:       temp.OpRemark,
+						ExtJSON:        temp.ExtJSON,
+						CtrlJSON:       temp.CtrlJSON,
+						GoodsSnapshoot: temp.GoodsSnapshoot,
+					})
+				}
+				return reviewInfoList, nil
+			}
+
+			if errors.Is(err, redis.Nil) {
+				// 缓存未命中，查询es
+				resp, err := r.data.ESCli.Search().
+					Index("review_info").
+					From(int(page - 1)).
+					Size(int(size)).
+					Query(&types.Query{
+						Bool: &types.BoolQuery{
+							Filter: []types.Query{
+								{
+									Term: map[string]types.TermQuery{
+										"store_id": {Value: storeID},
+									},
+								},
+							},
+						},
+					}).Do(ctx)
+				if err != nil {
+					r.log.Debugf("es search error: %v", err)
+					return nil, err
+				}
+
+				// 序列化，并将数据存入cache
+				hitsData, err := json.Marshal(resp.Hits)
+				if err != nil {
+					r.log.Debugf("json marshal error: %v", err)
+					return nil, err
+				}
+				r.setCache(ctx, key, hitsData)
+				continue
+			}
+
+			// 查询redis出错
+			return nil, err
+		}
+		return nil, retErr
+	})
+	if err != nil {
+		r.log.Debugf("singleflight error: %v", err)
+		return nil, err
+	}
+	r.log.Debugf("data: %v, err: %v, shared: %v", reviewInfoList, err, shared)
+	return reviewInfoList.([]*model.ReviewInfo), err
+}
+func (r *ReviewRepo) getCache(ctx context.Context, key string) ([]byte, error) {
+	// 使用string
+	return r.data.RedisCli.Get(ctx, key).Bytes()
+}
+func (r *ReviewRepo) setCache(ctx context.Context, key string, value []byte) error {
+	// cache存储的是es返回的res.hits (HitsMetadata)类型，使用时直接unmarshal即可
+	return r.data.RedisCli.Set(ctx, key, value, time.Minute*30).Err()
 }
 
 func (r *ReviewRepo) SaveReply(ctx context.Context, reply *model.ReviewReplyInfo) error {
