@@ -29,7 +29,8 @@ func wireApp(confServer *conf.Server, confData *conf.Data, registry *conf.Regist
 		return nil, nil, err
 	}
 	typedClient := data.NewESClient(elasticsearch)
-	dataData, cleanup, err := data.NewData(db, typedClient, logger)
+	client := data.NewRedisClient(confData)
+	dataData, cleanup, err := data.NewData(db, typedClient, client, logger)
 	if err != nil {
 		return nil, nil, err
 	}
